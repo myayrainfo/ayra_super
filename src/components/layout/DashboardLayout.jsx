@@ -22,8 +22,8 @@ export default function DashboardLayout() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     toast.success('Logged out successfully')
     navigate('/login')
   }

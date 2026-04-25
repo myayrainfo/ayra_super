@@ -1,86 +1,66 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import api from '@/services/api'
 
 export const useAuthStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       token: null,
       user: null,
       isLoading: false,
-      message: null, // added to show messages globally
 
-      // OLD LOGIN (COMMENTED)
-      /*
       login: async (email, password) => {
         set({ isLoading: true })
         try {
-          // Replace with real API call
-          await new Promise(r => setTimeout(r, 1200))
-          if (email === 'admin@ayra.edu' && password === 'Admin@123') {
-            const user = {
-              id: '1',
-              name: 'Super Admin',
-              email,
-              role: 'superadmin',
-              avatar: null,
-            }
-            set({ token: 'mock-jwt-token', user, isLoading: false })
-            return { success: true }
-          }
-          throw new Error('Invalid credentials')
-        } catch (err) {
+          const { data } = await api.post('/auth/login', { email, password })
+          set({
+            token: data.token,
+            user: data.user,
+            isLoading: false,
+          })
+          return { success: true }
+        } catch (error) {
           set({ isLoading: false })
-          return { success: false, message: err.message }
-        }
-      },
-      */
-
-      //NEW LOGIN 
-      login: async () => {
-        set({ token: null, user: null, isLoading: true })
-
-        await new Promise(r => setTimeout(r, 500))
-
-        set({
-          token: null,
-          user: null,
-          isLoading: false,
-          message: 'LOGIN SERVICES ARE TEMPORARILY UNAVAILABLE',
-        })
-
-        return {
-          success: false,
-          message: 'LOGIN SERVICES ARE TEMPORARILY UNAVAILABLE',
+          return {
+            success: false,
+            message: error.response?.data?.message || error.message || 'Login failed',
+          }
         }
       },
 
- 
-      // OLD LOGOUT (COMMENTED)
-
-      /*
-      logout: () => set({ token: null, user: null }),
-      */
-
-      // NEW LOGOUT (WITH MESSAGE)
-
-      logout: () => {
-        localStorage.removeItem('ayra-auth')
-
-        set({
-          token: null,
-          user: null,
-          message: 'LOGIN SERVICES ARE TEMPORARILY UNAVAILABLE',
-        })
+      verifySession: async () => {
+        set((state) => ({ ...state, isLoading: true }))
+        try {
+          const { data } = await api.get('/auth/verify')
+          set((state) => ({
+            ...state,
+            user: data.user,
+            isLoading: false,
+          }))
+          return true
+        } catch {
+          set({ token: null, user: null, isLoading: false })
+          return false
+        }
       },
 
-      updateUser: (data) => set(s => ({ user: { ...s.user, ...data } })),
+      logout: async () => {
+        try {
+          await api.post('/auth/logout')
+        } catch {
+          // Local cleanup should still succeed if the API is unavailable.
+        }
+        set({ token: null, user: null, isLoading: false })
+      },
+
+      updateUser: (data) =>
+        set((state) => ({
+          user: { ...state.user, ...data },
+        })),
     }),
     {
       name: 'ayra-auth',
-      partialize: s => ({
-        token: s.token,
-        user: s.user,
-      }),
+      partialize: (state) => ({ token: state.token, user: state.user }),
     }
   )
 )

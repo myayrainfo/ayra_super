@@ -19,7 +19,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             fontFamily: '"DM Sans", sans-serif',
           },
           success: { iconTheme: { primary: '#34d399', secondary: '#0f0f17' } },
-          error:   { iconTheme: { primary: '#fb7185', secondary: '#0f0f17' } },
+          error: { iconTheme: { primary: '#fb7185', secondary: '#0f0f17' } },
         }}
       />
     </BrowserRouter>
