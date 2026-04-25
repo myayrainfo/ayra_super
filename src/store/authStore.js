@@ -7,7 +7,10 @@ export const useAuthStore = create(
       token: null,
       user: null,
       isLoading: false,
+      message: null, // added to show messages globally
 
+      // OLD LOGIN (COMMENTED)
+      /*
       login: async (email, password) => {
         set({ isLoading: true })
         try {
@@ -30,14 +33,54 @@ export const useAuthStore = create(
           return { success: false, message: err.message }
         }
       },
+      */
 
+      //NEW LOGIN 
+      login: async () => {
+        set({ token: null, user: null, isLoading: true })
+
+        await new Promise(r => setTimeout(r, 500))
+
+        set({
+          token: null,
+          user: null,
+          isLoading: false,
+          message: 'LOGIN SERVICES ARE TEMPORARILY UNAVAILABLE',
+        })
+
+        return {
+          success: false,
+          message: 'LOGIN SERVICES ARE TEMPORARILY UNAVAILABLE',
+        }
+      },
+
+ 
+      // OLD LOGOUT (COMMENTED)
+
+      /*
       logout: () => set({ token: null, user: null }),
+      */
+
+      // NEW LOGOUT (WITH MESSAGE)
+
+      logout: () => {
+        localStorage.removeItem('ayra-auth')
+
+        set({
+          token: null,
+          user: null,
+          message: 'LOGIN SERVICES ARE TEMPORARILY UNAVAILABLE',
+        })
+      },
 
       updateUser: (data) => set(s => ({ user: { ...s.user, ...data } })),
     }),
     {
       name: 'ayra-auth',
-      partialize: s => ({ token: s.token, user: s.user }),
+      partialize: s => ({
+        token: s.token,
+        user: s.user,
+      }),
     }
   )
 )
